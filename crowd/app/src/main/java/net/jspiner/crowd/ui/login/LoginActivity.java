@@ -1,28 +1,39 @@
-package net.jspiner.crowd;
+package net.jspiner.crowd.ui.login;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
+import net.jspiner.crowd.R;
+import net.jspiner.crowd.databinding.ActivityLoginBinding;
+import net.jspiner.crowd.ui.base.BaseActivity;
+
 import java.util.Arrays;
 
-public class MainActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity<ActivityLoginBinding, Contract.Presenter> implements Contract.View {
 
-    CallbackManager callbackManager;
+    private CallbackManager callbackManager;
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_login;
+    }
+
+    @Override
+    protected Contract.Presenter createPresenter() {
+        return new LoginPresenter(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
 
         init();
     }
@@ -30,30 +41,33 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
         callbackManager = CallbackManager.Factory.create();
 
-        LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
+        LoginButton loginButton = findViewById(R.id.login_button);
         loginButton.setReadPermissions(Arrays.asList("email"));
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.i("TAG", "onSuccess");
-                Log.i("TAG", "token : " + loginResult.getAccessToken().getToken());
-                Log.i("TAG", "id : " + loginResult.getAccessToken().getUserId());
+                Toast.makeText(getBaseContext(), "로그인되었습니다.", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onCancel() {
-                Log.i("TAG", "onCancel");
+                Toast.makeText(getBaseContext(), "로그인이 취소되었습니다.", Toast.LENGTH_LONG).show();
 
             }
 
             @Override
             public void onError(FacebookException exception) {
+                Toast.makeText(getBaseContext(), "에러가 발생하였습니다.", Toast.LENGTH_LONG).show();
                 exception.printStackTrace();
                 Log.i("TAG", "onError : " + exception.getMessage());
 
             }
         });
+
+    }
+
+    private void startMapActivity() {
 
     }
 
