@@ -25,7 +25,10 @@ public abstract class BaseActivity<B extends ViewDataBinding, P extends BasePres
 
         setContentView(getLayoutId());
         presenter = createPresenter();
-        presenter.attachView();
+
+        if (presenter != null) {
+            presenter.attachView();
+        }
     }
 
     @Override

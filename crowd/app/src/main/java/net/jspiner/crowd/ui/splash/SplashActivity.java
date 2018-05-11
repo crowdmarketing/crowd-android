@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 
+import net.jspiner.crowd.R;
 import net.jspiner.crowd.ui.base.BaseActivity;
 import net.jspiner.crowd.ui.base.BasePresenterInterface;
 import net.jspiner.crowd.ui.login.LoginActivity;
@@ -21,7 +22,7 @@ public class SplashActivity extends BaseActivity {
 
     @Override
     protected int getLayoutId() {
-        return 0;
+        return R.layout.activity_splash;
     }
 
     @Override

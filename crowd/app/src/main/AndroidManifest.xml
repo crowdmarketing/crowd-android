@@ -17,12 +17,13 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>\
+            </intent-filter>
 
         </activity>
 
-        <activity android:name=".ui.login.LoginActivity">
-        </activity>
+        <activity android:name=".ui.login.LoginActivity"></activity>
+
+        <activity android:name=".ui.map.MapActivity"></activity>
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
