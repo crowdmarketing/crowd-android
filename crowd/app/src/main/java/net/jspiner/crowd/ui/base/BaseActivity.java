@@ -41,7 +41,9 @@ public abstract class BaseActivity<B extends ViewDataBinding, P extends BasePres
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        presenter.detachView();
+        if (presenter != null) {
+            presenter.detachView();
+        }
     }
 
 }

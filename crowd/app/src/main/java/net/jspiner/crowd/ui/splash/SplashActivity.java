@@ -47,7 +47,7 @@ public class SplashActivity extends BaseActivity {
                     if (accessToken == null) {
                         intent = new Intent(SplashActivity.this, LoginActivity.class);
                     } else {
-                        intent = new Intent(SplashActivity.this, MapActivity.class);
+                        intent = new Intent(SplashActivity.this, LoginActivity.class);
                     }
                     startActivity(intent);
 
