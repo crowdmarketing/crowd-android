@@ -47,11 +47,18 @@ public class PhoneAuthActivity extends BaseActivity<ActivityPhoneBinding, BasePr
 
     private void init() {
         Profile profile = Profile.getCurrentProfile();
+        if (profile != null){
+            onProfileReceived(profile);
+        }
+        else {
+            new ProfileTracker(){
 
-        Glide.with(this)
-                .load(profile.getProfilePictureUri(500, 500))
-                .into(binding.profileImage);
-        binding.name.setText(profile.getName());
+                @Override
+                protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+                    onProfileReceived(currentProfile);
+                }
+            }.startTracking();
+        }
 
         binding.phone.addTextChangedListener(new TextWatcher() {
             @Override
@@ -107,6 +114,14 @@ public class PhoneAuthActivity extends BaseActivity<ActivityPhoneBinding, BasePr
         binding.auth.setOnClickListener(__ -> {
             startMapActivity();
         });
+    }
+
+    private void onProfileReceived(Profile profile) {
+        Glide.with(this)
+                .load(profile.getProfilePictureUri(500, 500))
+                .into(binding.profileImage);
+        binding.name.setText(profile.getName());
+
     }
 
     private void startCountDown() {
