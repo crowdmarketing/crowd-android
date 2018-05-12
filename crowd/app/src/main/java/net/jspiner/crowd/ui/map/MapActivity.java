@@ -174,8 +174,7 @@ public class MapActivity extends BaseActivity<ActivityMapBinding, BasePresenterI
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == IntentIntegrator.REQUEST_CODE) {
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-            if (result == null) {
-            } else {
+            if (result != null && TextUtils.isEmpty(result.getContents()) == false) {
                 requestSavePoint(result.getContents());
             }
         } else {
