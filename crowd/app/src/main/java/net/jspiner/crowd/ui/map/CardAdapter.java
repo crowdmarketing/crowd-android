@@ -47,7 +47,7 @@ public class CardAdapter extends PagerAdapter {
     public int getItemPosition(Object object) {
         return POSITION_NONE;
     }
-    
+
     @Override
     public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
         return view == object;

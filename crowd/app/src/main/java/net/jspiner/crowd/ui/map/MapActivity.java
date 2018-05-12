@@ -2,6 +2,7 @@ package net.jspiner.crowd.ui.map;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,6 +12,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,6 +23,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import net.jspiner.crowd.R;
 import net.jspiner.crowd.api.Api;
@@ -164,5 +168,31 @@ public class MapActivity extends BaseActivity<ActivityMapBinding, BasePresenterI
             phoneNumber = formatPhoneNumber;
         }
         return phoneNumber;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == IntentIntegrator.REQUEST_CODE) {
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (result == null) {
+            } else {
+                requestSavePoint(result.getContents());
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void requestSavePoint(String authCode) {
+        Api.getService().savePoint(
+                ReviewView.lastSelectedCompanyId,
+                getDevicePhoneNumber(),
+                ReviewView.lastSelectedUserPhone,
+                authCode
+        ).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> {
+                    Toast.makeText(getBaseContext(), "적립되었습니다!", Toast.LENGTH_LONG).show();
+                });
     }
 }

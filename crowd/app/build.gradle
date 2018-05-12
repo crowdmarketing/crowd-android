@@ -68,4 +68,7 @@ dependencies {
     // map
     implementation 'com.google.android.gms:play-services-maps:10.0.1'
     implementation 'com.google.android.gms:play-services-location:10.0.1'
+
+    // qr
+    compile 'com.journeyapps:zxing-android-embedded:3.5.0'
 }

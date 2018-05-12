@@ -14,6 +14,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -30,6 +31,14 @@ public interface ApiService {
     Single<ArrayList<User>> getCompanyFriends(
             @Path("companyId") int companyId,
             @Path("phoneNumber") String phoneNumber
+    );
+
+    @POST("/companys/{companyId}/users/{phoneNumber}/recommanders/{recommanderPhoneNumber}")
+    Completable savePoint(
+            @Path("companyId") int companyId,
+            @Path("phoneNumber") String phoneNumber,
+            @Path("recommanderPhoneNumber") String recommanderPhoneNumber,
+            @Query("qrCode") String qrCode
     );
 
     @POST("/users")
