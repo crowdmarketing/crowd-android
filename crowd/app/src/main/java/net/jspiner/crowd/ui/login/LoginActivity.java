@@ -12,8 +12,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -29,6 +31,9 @@ import net.jspiner.crowd.ui.map.MapActivity;
 import net.jspiner.crowd.ui.phone.PhoneAuthActivity;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Completable;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding, BasePresenter> {
 
@@ -95,6 +100,17 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, BasePresen
 
             }
         });
+
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (accessToken != null) {
+            binding.loginButton.setVisibility(View.GONE);
+
+            Completable.timer(1000 * 3, TimeUnit.MILLISECONDS)
+                    .subscribe(() -> {
+                        Intent intent = new Intent(LoginActivity.this, MapActivity.class);
+                        startActivity(intent);
+                    });
+        }
     }
 
     private void startPhoneActivity() {

@@ -1,9 +1,17 @@
 package net.jspiner.crowd.ui.phone;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 
@@ -14,15 +22,18 @@ import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 
 import net.jspiner.crowd.R;
+import net.jspiner.crowd.api.Api;
 import net.jspiner.crowd.databinding.ActivityPhoneBinding;
 import net.jspiner.crowd.ui.base.BaseActivity;
 import net.jspiner.crowd.ui.base.BasePresenterInterface;
 import net.jspiner.crowd.ui.map.MapActivity;
 
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static android.view.View.VISIBLE;
 
@@ -47,11 +58,12 @@ public class PhoneAuthActivity extends BaseActivity<ActivityPhoneBinding, BasePr
 
     private void init() {
         Profile profile = Profile.getCurrentProfile();
-        if (profile != null){
+        binding.phone.setText(getDevicePhoneNumber());
+        requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, 1101);
+        if (profile != null) {
             onProfileReceived(profile);
-        }
-        else {
-            new ProfileTracker(){
+        } else {
+            new ProfileTracker() {
 
                 @Override
                 protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
@@ -112,7 +124,21 @@ public class PhoneAuthActivity extends BaseActivity<ActivityPhoneBinding, BasePr
             binding.auth.setVisibility(VISIBLE);
         });
         binding.auth.setOnClickListener(__ -> {
-            startMapActivity();
+            AccessToken accessToken = AccessToken.getCurrentAccessToken();
+
+            HashMap<String, String> params = new HashMap<>();
+            params.put("access_token", accessToken.getToken());
+            params.put("id", accessToken.getUserId());
+            params.put("name", Profile.getCurrentProfile().getName());
+            params.put("phone_number", getDevicePhoneNumber());
+            params.put("profile_image_url", Profile.getCurrentProfile().getProfilePictureUri(500, 500).toString());
+            Api.getService().createUser(
+                    params
+            ).observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(() -> {
+                        startMapActivity();
+                    });
         });
     }
 
@@ -141,5 +167,28 @@ public class PhoneAuthActivity extends BaseActivity<ActivityPhoneBinding, BasePr
         Intent intent = new Intent(PhoneAuthActivity.this, MapActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    public String getDevicePhoneNumber() {
+        if (ActivityCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return "";
+        }
+
+        String phoneNumber = "";
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        phoneNumber = telephonyManager.getLine1Number();
+        String formatPhoneNumber;
+        if (!TextUtils.isEmpty(phoneNumber) && phoneNumber.startsWith("+82")) {
+            formatPhoneNumber = "0" + phoneNumber.substring(3);
+            phoneNumber = formatPhoneNumber;
+        }
+        return phoneNumber;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        binding.phone.setText(getDevicePhoneNumber());
     }
 }

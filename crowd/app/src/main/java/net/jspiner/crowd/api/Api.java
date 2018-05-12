@@ -23,7 +23,7 @@ public class Api {
             OkHttpClient okHttpClient = builder.build();
 
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://")
+                    .baseUrl("http://lottehotel.koreacentral.cloudapp.azure.com/")
                     .addConverterFactory(GsonConverterFactory.create(new Gson()))
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .client(okHttpClient)
