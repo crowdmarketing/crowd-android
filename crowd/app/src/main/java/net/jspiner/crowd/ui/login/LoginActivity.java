@@ -26,6 +26,7 @@ import net.jspiner.crowd.ui.login.adapter.LoginBackgroundAdapter;
 import net.jspiner.crowd.ui.base.BaseActivity;
 import net.jspiner.crowd.ui.base.BasePresenter;
 import net.jspiner.crowd.ui.map.MapActivity;
+import net.jspiner.crowd.ui.phone.PhoneAuthActivity;
 
 import java.util.Arrays;
 
@@ -77,7 +78,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, BasePresen
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Toast.makeText(getBaseContext(), "로그인되었습니다.", Toast.LENGTH_LONG).show();
+                startPhoneActivity();
             }
 
             @Override
@@ -96,8 +97,8 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, BasePresen
         });
     }
 
-    private void startMainActivity() {
-        Intent intent = new Intent(this, MapActivity.class);
+    private void startPhoneActivity() {
+        Intent intent = new Intent(this, PhoneAuthActivity.class);
         startActivity(intent);
         finish();
     }
