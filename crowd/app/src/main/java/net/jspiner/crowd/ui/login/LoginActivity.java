@@ -83,6 +83,8 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, BasePresen
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
+                Log.i("TAG", "token : " + loginResult.getAccessToken().getToken());
+                Log.i("TAG", "id : " + loginResult.getAccessToken().getUserId());
                 startPhoneActivity();
             }
 

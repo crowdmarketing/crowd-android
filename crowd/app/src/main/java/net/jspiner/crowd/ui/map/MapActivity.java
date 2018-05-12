@@ -1,8 +1,14 @@
 package net.jspiner.crowd.ui.map;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
@@ -30,6 +36,9 @@ public class MapActivity extends BaseActivity<ActivityMapBinding, BasePresenterI
 
     private CardAdapter adapter;
     private GoogleMap googleMap;
+
+    private static final String CUSTOMER = "customer";
+    private static final String MARKETOR = "marketor";
 
     @Override
     protected int getLayoutId() {
@@ -66,12 +75,22 @@ public class MapActivity extends BaseActivity<ActivityMapBinding, BasePresenterI
                 binding.container.setVisibility(View.VISIBLE);
                 Company company = (Company) marker.getTag();
                 binding.name.setText(company.name);
+                loadCompanyFriends(company);
                 return false;
             });
 
             loadCompanies();
 
         });
+    }
+
+    private void loadCompanyFriends(Company company) {
+        Api.getService().getCompanyFriends(
+                company.id,
+                getDevicePhoneNumber()
+        ).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(users -> adapter.resetAll(users));
     }
 
     private void loadCompanies() {
@@ -82,18 +101,42 @@ public class MapActivity extends BaseActivity<ActivityMapBinding, BasePresenterI
                     Log.i("TAG", "companyies : " + new Gson().toJson(companies));
 
                     for (Company company : companies) {
-                        LatLng position = new LatLng(company.la, company.lo);
-                        Marker marker = googleMap.addMarker(
-                                new MarkerOptions().position(position)
-                                        .title(company.name)
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-                        );
-                        marker.setTag(company);
-
+                        loadCompanyDetail(company);
                     }
 
                     LatLng cameraPosition = new LatLng(37.4882187, 127.0626);
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(cameraPosition, 15f));
+
+                });
+    }
+
+    private void loadCompanyDetail(Company company) {
+        Api.getService().getCompanyDetail(
+                company.id,
+                getDevicePhoneNumber()
+        ).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(companyDetail -> {
+                    float color;
+                    switch (companyDetail.position) {
+                        case CUSTOMER:
+                        case "temp":
+                            color = BitmapDescriptorFactory.HUE_RED;
+                            break;
+                        case MARKETOR:
+                            color = BitmapDescriptorFactory.HUE_GREEN;
+                            break;
+                        default:
+                            color = BitmapDescriptorFactory.HUE_ORANGE;
+                            break;
+                    }
+                    LatLng latLng = new LatLng(company.la, company.lo);
+                    Marker marker = googleMap.addMarker(
+                            new MarkerOptions().position(latLng)
+                                    .title(company.name)
+                                    .icon(BitmapDescriptorFactory.defaultMarker(color))
+                    );
+                    marker.setTag(company);
 
                 });
     }
@@ -103,7 +146,23 @@ public class MapActivity extends BaseActivity<ActivityMapBinding, BasePresenterI
         binding.pager.setAdapter(adapter);
 
         binding.pager.setClipToPadding(false);
-        binding.pager.setPadding(150, 0, 150, 0);
-        binding.pager.setPageMargin(5);
+        binding.pager.setPadding(120, 0, 150, 0);
+        binding.pager.setPageMargin(50);
+    }
+
+    public String getDevicePhoneNumber() {
+        if (ActivityCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return "";
+        }
+
+        String phoneNumber = "";
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        phoneNumber = telephonyManager.getLine1Number();
+        String formatPhoneNumber;
+        if (!TextUtils.isEmpty(phoneNumber) && phoneNumber.startsWith("+82")) {
+            formatPhoneNumber = "0" + phoneNumber.substring(3);
+            phoneNumber = formatPhoneNumber;
+        }
+        return phoneNumber;
     }
 }
